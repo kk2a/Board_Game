@@ -5,9 +5,10 @@ BLACK = 1
 WHITE = -1
 NONE = 0
 
+
 class Board:
     def __init__(self, n):
-        assert not(n & 1)
+        assert not (n & 1)
         self._n = n
         self.stone = np.zeros((n, n))
         tmp = n >> 1
@@ -23,7 +24,6 @@ class Board:
         # 1: lose a turn
         # 2: end
         self.status = 0
-
 
     def __valid(self, i, j, di, dj, nt):
         n = self._n
@@ -67,8 +67,8 @@ class Board:
                     self.snapshot()
                     snap = False
                 res = True
-                for l in range(good[k] + 1):
-                    self.stone[i + di[k] * l, j + dj[k] * l] = self.nowturn
+                for L in range(good[k] + 1):
+                    self.stone[i + di[k] * L, j + dj[k] * L] = self.nowturn
         return res
 
     def next(self):
@@ -111,6 +111,7 @@ class Board:
             for j in range(n):
                 self.stone[i, j] = tmp[0][i, j]
 
+
 class Game:
     def __init__(self, n, w, h):
         pg.init()
@@ -120,23 +121,25 @@ class Game:
 
         self.disp_w = w
         self.disp_h = h
-        self.screen = pg.display.set_mode((w, h)) 
+        self.screen = pg.display.set_mode((w, h))
         self.init_space = 20
 
         self.font_size = 20
         self.font = pg.font.Font("ipaexg.ttf", self.font_size)
-        
+
         while not self.exit_flag:
             self.update()
             self.draw()
-    
+
     def update(self):
         for event in pg.event.get():
-            if event.type == pg.QUIT: # ウィンドウ[X]の押下
+            if event.type == pg.QUIT:  # ウィンドウ[X]の押下
                 self.exit_flag = True
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_z:
                     self.board.rollback()
+                if event.key == pg.K_q:
+                    self.exit_flag = True
             if event.type == pg.MOUSEBUTTONDOWN:
                 i, j = self.__convert(pg.mouse.get_pos())
                 if self.board.valid(i, j):
@@ -149,10 +152,12 @@ class Game:
         n = self._n
         h = self.disp_h
         interval = (h - 2 * sp) / n
-        i -= sp; i //= interval
-        j -= sp; j //= interval
+        i -= sp
+        i //= interval
+        j -= sp
+        j //= interval
         return (int(i), int(j))
-        
+
     def draw(self):
         sp = self.init_space
         n = self._n
@@ -169,20 +174,21 @@ class Game:
                          (sp, sp + i * interval),
                          (h - sp, sp + i * interval))
 
-        color = {BLACK : "#000000", WHITE : "#ffffff"}
+        color = {BLACK: "#000000", WHITE: "#ffffff"}
         for i in range(n):
             for j in range(n):
                 if self.board.stone[i, j]:
                     pg.draw.circle(self.screen, color[self.board.stone[i][j]],
                                    (sp + interval * (i + 0.5),
                                     sp + interval * (j + 0.5)),
-                                    interval / 2 * 0.9)
+                                   interval / 2 * 0.9)
 
-        row = 5
+        self.draw_explanation()
         if self.board.status == 2:
             self.draw_finish()
             return
 
+        row = 5
         color[BLACK] = "黒"
         color[WHITE] = "白"
         st = f"現在のターンは{color[self.board.nowturn]}です"
@@ -196,16 +202,16 @@ class Game:
     def draw_lose_a_turn(self, r):
         w = self.disp_w
         h = self.disp_h
-        color = {BLACK : "黒", WHITE : "白"}
+        color = {BLACK: "黒", WHITE: "白"}
         st = f"置く場所がなかったので{color[-self.board.nowturn]}は休みです"
         txt = self.font.render(st, True, "#000000")
         self.screen.blit(txt, txt.get_rect(
             center=((w + h) / 2, h / 2 - r * self.font_size)))
-    
+
     def draw_finish(self):
         w = self.disp_w
         h = self.disp_h
-        color = {BLACK : "黒", WHITE : "白"}
+        color = {BLACK: "黒", WHITE: "白"}
         bl = np.sum(self.board.stone == BLACK)
         wh = np.sum(self.board.stone == WHITE)
 
@@ -215,12 +221,21 @@ class Game:
             st.append("引き分け！！すげー")
         else:
             st.append(f"{color[(bl - wh) // abs(bl - wh)]}の勝ち！！")
-        
+
         for i, s in enumerate(st):
             txt = self.font.render(s, True, "#000000")
             self.screen.blit(txt, txt.get_rect(
                 center=((w + h) / 2, h / 2 - (5 - i) * self.font_size)))
-        
+
+    def draw_explanation(self):
+        w = self.disp_w
+        h = self.disp_h
+        st = ["Q → ゲームをやめる", "Z → 一つもどる"]
+        for i, s in enumerate(st):
+            txt = self.font.render(s, True, "#000000")
+            self.screen.blit(txt, txt.get_rect(
+                center=((w + h) / 2, h / 2 + (5 - i) * self.font_size)))
+
 
 if __name__ == '__main__':
     DISPLAY_W = 1000
@@ -228,4 +243,3 @@ if __name__ == '__main__':
     n = 6
     Game(n, DISPLAY_W, DISPLAY_H)
     pg.quit()
-
