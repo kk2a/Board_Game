@@ -148,7 +148,7 @@ class Game:
 
         back = "#e2e2e2"
         self.screen.fill(back)
-        pg.draw.rect(self.screen, "#0981cb", (sp, sp, h - 2 * sp + interval, h - 2 * sp))
+        pg.draw.rect(self.screen, "#0981cb", (sp, sp, interval * n_w, interval * n_h))
         for i in range(n_w + 1):
             pg.draw.line(self.screen, '#000000',
                          (sp + i * interval, sp),
