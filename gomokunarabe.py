@@ -27,6 +27,8 @@ class Board:
             return 0
         if self.stone[i, j]:
             return 0
+        if self.status != 0:
+            return 0
         return 1
 
     def valid(self, i, j):
