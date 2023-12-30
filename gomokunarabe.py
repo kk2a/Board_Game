@@ -17,7 +17,7 @@ class Board:
 
         # 0: normal
         # BLACK: black win
-        # WHITE: white win 
+        # WHITE: white win
         # 2: draw
         self.status = 0
 
@@ -42,7 +42,7 @@ class Board:
         n = BOARD_SIZE
         di = [0, 1, 1, 1]
         dj = [-1, -1, 0, 1]
-        
+
         for k in range(4):
             for ii in range(5):
                 ni = i + ii * di[k]
@@ -104,7 +104,7 @@ class Game:
         while not self.exit_flag:
             self.update()
             self.draw()
-    
+
     def update(self):
         for event in pg.event.get():
             if event.type == pg.QUIT:  # ウィンドウ[X]の押下
