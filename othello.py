@@ -56,6 +56,8 @@ class Board:
         res = False
         snap = True
         good = np.zeros(8, int)
+        i = int(i)
+        j = int(j)
 
         for k in range(8):
             num = self.__valid(i, j, di[k], dj[k], self.nowturn)
@@ -69,7 +71,9 @@ class Board:
                 res = True
                 for L in range(good[k] + 1):
                     self.stone[i + di[k] * L, j + dj[k] * L] = self.nowturn
-        return res
+
+        if res:
+            self.next()
 
     def next(self):
         n = self._n
@@ -142,8 +146,7 @@ class Game:
                     self.exit_flag = True
             if event.type == pg.MOUSEBUTTONDOWN:
                 i, j = self.__convert(pg.mouse.get_pos())
-                if self.board.valid(i, j):
-                    self.board.next()
+                self.board.valid(i, j)
         pg.display.update()
 
     def __convert(self, p):
@@ -156,7 +159,7 @@ class Game:
         i //= interval
         j -= sp
         j //= interval
-        return (int(i), int(j))
+        return (i, j)
 
     def draw(self):
         sp = self.init_space
@@ -214,7 +217,6 @@ class Game:
         color = {BLACK: "黒", WHITE: "白"}
         bl = np.sum(self.board.stone == BLACK)
         wh = np.sum(self.board.stone == WHITE)
-
         st = ["しゅうりょうーーー", f"黒:{bl}枚", f"白:{wh}枚"]
 
         if bl == wh:
