@@ -151,7 +151,9 @@ class Game:
         h = self.disp_h
         interval = (h - 2 * sp) / n_h
 
-        self.screen.fill('#c18a39')
+        back = "#e2e2e2"
+        self.screen.fill(back)
+        pg.draw.rect(self.screen, "#0981cb", (sp, sp, h - 2 * sp + interval, h - 2 * sp))
         for i in range(n_w + 1):
             pg.draw.line(self.screen, '#000000',
                          (sp + i * interval, sp),
@@ -161,6 +163,13 @@ class Game:
                          (sp, sp + i * interval),
                          (h - sp + interval, sp + i * interval))
 
+        for i in range(n_w):
+            for j in range(n_h):
+                pg.draw.circle(self.screen, back,
+                               (sp + interval * (i + 0.5),
+                                sp + interval * (j + 0.5)),
+                               interval / 2 * 0.85)
+
         color = {RED: "#e60000", YELLOW: "#e6e645"}
         for i in range(n_w):
             for j in range(n_h):
@@ -168,7 +177,7 @@ class Game:
                     pg.draw.circle(self.screen, color[self.board.stone[i][j]],
                                    (sp + interval * (i + 0.5),
                                     sp + interval * (j + 0.5)),
-                                   interval / 2 * 0.9)
+                                   interval / 2 * 0.85)
 
         self.draw_explanation()
         if self.board.status:
