@@ -1,5 +1,6 @@
 import pygame as pg
 import numpy as np
+import copy
 
 BLACK = 1
 WHITE = -1
@@ -70,12 +71,8 @@ class Board:
         self.nowturn = -self.nowturn
 
     def snapshot(self):
-        n = BOARD_SIZE
-        tmp = np.zeros((n + 1, n + 1))
-        for i in range(n + 1):
-            for j in range(n + 1):
-                tmp[i, j] = self.stone[i, j]
-        self.hist.append((tmp, self.nowturn, self.status))
+        self.hist.append((copy.deepcopy(self.stone),
+                          self.nowturn, self.status))
 
     def rollback(self):
         n = BOARD_SIZE
@@ -84,9 +81,7 @@ class Board:
         tmp = self.hist.pop()
         self.nowturn = tmp[1]
         self.status = tmp[2]
-        for i in range(n + 1):
-            for j in range(n + 1):
-                self.stone[i, j] = tmp[0][i, j]
+        self.stone = copy.deepcopy(tmp[0])
 
 
 class Game:
