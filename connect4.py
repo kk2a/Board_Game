@@ -110,6 +110,7 @@ class Game:
         while not self.exit_flag:
             self.update()
             self.draw()
+        pg.quit()
 
     def update(self):
         for event in pg.event.get():
@@ -225,4 +226,3 @@ if __name__ == "__main__":
     DISPLAY_W = 1000
     DISPLAY_H = 600
     Game(DISPLAY_W, DISPLAY_H)
-    pg.quit()
