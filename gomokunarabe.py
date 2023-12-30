@@ -27,7 +27,7 @@ class Board:
             return 0
         if self.stone[i, j]:
             return 0
-        if self.status != 0:
+        if self.status:
             return 0
         return 1
 
@@ -64,7 +64,7 @@ class Board:
                 if not tmp:
                     self.status = self.nowturn
                     return
-        if not np.sum(self.stone == 0):
+        if not np.sum(self.stone == NONE):
             self.status = 2
             return
         self.nowturn = -self.nowturn
@@ -152,8 +152,7 @@ class Game:
         chobo = ((3, 3), (3, n - 3), (n - 3, 3), (n - 3, n - 3))
         for i, j in chobo:
             pg.draw.circle(self.screen, '#000000',
-                           (sp + i * interval, sp + j * interval),
-                           3)
+                           (sp + i * interval, sp + j * interval), 3)
 
         color = {BLACK: "#000000", WHITE: "#ffffff"}
         for i in range(n + 1):
