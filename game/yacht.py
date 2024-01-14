@@ -434,9 +434,11 @@ class Game:
         elif fisum < sesum:
             st.append("後攻の勝ち！！")
         for i, s in enumerate(st):
-            txt = self.font.render(s, True, "#000000")
+            txt = pg.font.Font(
+                "../Mplus1-Black.ttf", 20
+            ).render(s, True, "#000000")
             self.screen.blit(txt, txt.get_rect(
-                top=h / 3 + (5 + i) * self.font_size,
+                top=h / 3 + (5 + i) * 20,
                 centerx=w / 2 + dsz * 2.5 + dsp * 2))
 
     def draw_explanation(self):
@@ -447,9 +449,11 @@ class Game:
         st = ["Q: ゲームをやめる", "SPACE: サイコロを振る",
               "1,2,3,4,5: サイコロを選択", "LEFT CLICK: 役を選択"]
         for i, s in enumerate(st):
-            txt = self.font.render(s, True, "#000000")
+            txt = pg.font.Font(
+                "../Mplus1-Black.ttf", 20
+            ).render(s, True, "#000000")
             self.screen.blit(txt, txt.get_rect(
-                top=h / 3 + (8 + i) * self.font_size,
+                top=h / 3 + (8 + i) * 20,
                 centerx=w / 2 + dsz * 2.5 + dsp * 2))
 
 
