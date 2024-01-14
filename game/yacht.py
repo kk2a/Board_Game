@@ -147,6 +147,7 @@ class Game:
         self.dsz = 40
         self.csz = self.dsz / 3.5 / 2
         self.dsp = 10
+        clock = pg.time.Clock()
 
         self.d1.roll()
         self.exit_flag = False
@@ -173,7 +174,7 @@ class Game:
                         continue
                     if self.roll_count:
                         continue
-                    self.roll_count = 100
+                    self.roll_count = 30
                     self.dcount += 1
                 for i, k in enumerate((pg.K_1, pg.K_2,
                                        pg.K_3, pg.K_4, pg.K_5)):
@@ -185,7 +186,7 @@ class Game:
 
         if self.roll_count:
             self.roll_count -= 1
-            if not self.roll_count % 10:
+            if not self.roll_count % 3:
                 (self.d2 if self.now & 1 else self.d1).roll(self.select)
 
         pg.display.update()
