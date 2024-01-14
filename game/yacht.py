@@ -137,8 +137,8 @@ class Game:
         self.screen = pg.display.set_mode((w, h))
         self.init_space = 10
 
-        self.font_size = 20
-        self.font = pg.font.Font("../ipaexg.ttf", self.font_size)
+        self.font_size = 15
+        self.font = pg.font.Font("../Mplus1-Black.ttf", self.font_size)
 
         self.paper_w = w / 3
         self.paper_h = h - 2 * self.init_space
@@ -161,6 +161,8 @@ class Game:
             if self.status == 1:
                 continue
             if event.type == pg.MOUSEBUTTONDOWN:
+                if self.roll_count:
+                    continue
                 self.mouse_click()
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_q:
@@ -442,8 +444,8 @@ class Game:
         h = self.disp_h
         dsz = self.dsz
         dsp = self.dsp
-        st = ["Q → ゲームをやめる", "SPACE → サイコロを振る",
-              "1,2,3,4,5 → サイコロを選択", "LEFT CLICK → 役を選択"]
+        st = ["Q: ゲームをやめる", "SPACE: サイコロを振る",
+              "1,2,3,4,5: サイコロを選択", "LEFT CLICK: 役を選択"]
         for i, s in enumerate(st):
             txt = self.font.render(s, True, "#000000")
             self.screen.blit(txt, txt.get_rect(

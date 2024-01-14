@@ -105,7 +105,7 @@ class Game:
         self.init_space = 20
 
         self.font_size = 20
-        self.font = pg.font.Font("../ipaexg.ttf", self.font_size)
+        self.font = pg.font.Font("../Mplus1-Black.ttf", self.font_size)
 
         while not self.exit_flag:
             self.update()
@@ -214,7 +214,7 @@ class Game:
         n_h = BOARDSIZE_H
         sp = self.init_space
         interval = (h - 2 * sp) / n_h
-        st = ["Q → ゲームをやめる", "Z → 一つもどる"]
+        st = ["Q: ゲームをやめる", "Z: 一つもどる"]
         for i, s in enumerate(st):
             txt = self.font.render(s, True, "#000000")
             self.screen.blit(txt, txt.get_rect(
