@@ -2,70 +2,62 @@ import pygame as pg
 import numpy as np
 import copy
 
-RED = 1
-YELLOW = -1
+BLACK = 1
+WHITE = -1
 NONE = 0
-
-BOARDSIZE_W = 7
-BOARDSIZE_H = 6
+BOARD_SIZE = 14
 
 
 class Board:
     def __init__(self):
-        h = BOARDSIZE_H
-        w = BOARDSIZE_W
-        self.stone = np.zeros((w, h))
-        self.nowturn = RED
+        n = BOARD_SIZE
+        self.stone = np.zeros((n + 1, n + 1))
+
+        self.nowturn = BLACK
         self.hist = []
 
         # 0: normal
-        # RED: red win
-        # YELLOW: yellow win
+        # BLACK: black win
+        # WHITE: white win
         # 2: draw
         self.status = 0
 
-    def __valid(self, i):
-        w = BOARDSIZE_W
-        if not (0 <= i < w):
+    def __valid(self, i, j):
+        n = BOARD_SIZE
+        if not (0 <= i < n + 1 and 0 <= j < n + 1):
             return 0
-        if self.stone[i][0]:
+        if self.stone[i, j]:
             return 0
         if self.status:
             return 0
         return 1
 
-    def valid(self, i):
+    def valid(self, i, j):
         i = int(i)
-        h = BOARDSIZE_H
-        if not self.__valid(i):
+        j = int(j)
+        if not self.__valid(i, j):
             return
         self.snapshot()
-        j = -1
-        for ii in reversed(range(h)):
-            if not self.stone[i][ii]:
-                self.stone[i][ii] = self.nowturn
-                j = ii
-                break
+        self.stone[i, j] = self.nowturn
         self.next(i, j)
 
     def next(self, i, j):
-        h = BOARDSIZE_H
-        w = BOARDSIZE_W
+        n = BOARD_SIZE
         di = [0, 1, 1, 1]
         dj = [-1, -1, 0, 1]
 
         for k in range(4):
-            for ii in range(4):
+            for ii in range(5):
                 ni = i + ii * di[k]
                 nj = j + ii * dj[k]
-                nii = i + (ii - 3) * di[k]
-                njj = j + (ii - 3) * dj[k]
-                if not (0 <= ni < w and 0 <= nj < h):
+                nii = i + (ii - 4) * di[k]
+                njj = j + (ii - 4) * dj[k]
+                if not (0 <= ni < n + 1 and 0 <= nj < n + 1):
                     continue
-                if not (0 <= nii < w and 0 <= njj < h):
+                if not (0 <= nii < n + 1 and 0 <= njj < n + 1):
                     continue
-                tmp = -self.nowturn * 4
-                for _ in range(4):
+                tmp = -self.nowturn * 5
+                for _ in range(5):
                     tmp += self.stone[ni, nj]
                     ni -= di[k]
                     nj -= dj[k]
@@ -83,8 +75,7 @@ class Board:
                           self.nowturn, self.status))
 
     def rollback(self):
-        h = BOARDSIZE_H
-        w = BOARDSIZE_W
+        n = BOARD_SIZE
         if not len(self.hist):
             return
         tmp = self.hist.pop()
@@ -105,7 +96,7 @@ class Game:
         self.init_space = 20
 
         self.font_size = 20
-        self.font = pg.font.Font("ipaexg.ttf", self.font_size)
+        self.font = pg.font.Font("../ipaexg.ttf", self.font_size)
 
         while not self.exit_flag:
             self.update()
@@ -123,56 +114,50 @@ class Game:
                     self.exit_flag = True
             if event.type == pg.MOUSEBUTTONDOWN:
                 i, j = self.__convert(pg.mouse.get_pos())
-                self.board.valid(i)
+                self.board.valid(i, j)
         pg.display.update()
 
     def __convert(self, p):
         i, j = p
         sp = self.init_space
-        n_h = BOARDSIZE_H
+        n = BOARD_SIZE
         h = self.disp_h
-        interval = (h - 2 * sp) / n_h
-        i -= sp
+        interval = (h - 2 * sp) / n
+        i -= sp - interval / 2
         i //= interval
-        j -= sp
+        j -= sp - interval / 2
         j //= interval
         return (i, j)
 
     def draw(self):
         sp = self.init_space
-        n_h = BOARDSIZE_H
-        n_w = BOARDSIZE_W
+        n = BOARD_SIZE
         w = self.disp_w
         h = self.disp_h
-        interval = (h - 2 * sp) / n_h
+        interval = (h - 2 * sp) / n
 
-        back = "#e2e2e2"
-        self.screen.fill(back)
-        pg.draw.rect(self.screen, "#0981cb", (sp, sp, interval * n_w, interval * n_h))
-        for i in range(n_w + 1):
+        self.screen.fill('#c18a39')
+        for i in range(n + 1):
             pg.draw.line(self.screen, '#000000',
                          (sp + i * interval, sp),
                          (sp + i * interval, h - sp))
-        for i in range(n_h + 1):
             pg.draw.line(self.screen, '#000000',
                          (sp, sp + i * interval),
-                         (h - sp + interval, sp + i * interval))
+                         (h - sp, sp + i * interval))
 
-        for i in range(n_w):
-            for j in range(n_h):
-                pg.draw.circle(self.screen, back,
-                               (sp + interval * (i + 0.5),
-                                sp + interval * (j + 0.5)),
-                               interval / 2 * 0.85)
+        chobo = ((3, 3), (3, n - 3), (n - 3, 3), (n - 3, n - 3))
+        for i, j in chobo:
+            pg.draw.circle(self.screen, '#000000',
+                           (sp + i * interval, sp + j * interval), 3)
 
-        color = {RED: "#e60000", YELLOW: "#e6e645"}
-        for i in range(n_w):
-            for j in range(n_h):
+        color = {BLACK: "#000000", WHITE: "#ffffff"}
+        for i in range(n + 1):
+            for j in range(n + 1):
                 if self.board.stone[i, j]:
                     pg.draw.circle(self.screen, color[self.board.stone[i][j]],
-                                   (sp + interval * (i + 0.5),
-                                    sp + interval * (j + 0.5)),
-                                   interval / 2 * 0.85)
+                                   (sp + interval * i,
+                                    sp + interval * j),
+                                   interval / 2 * 0.9)
 
         self.draw_explanation()
         if self.board.status:
@@ -180,21 +165,19 @@ class Game:
             return
 
         row = 5
-        color[RED] = "赤"
-        color[YELLOW] = "黄"
+        color[BLACK] = "黒"
+        color[WHITE] = "白"
         st = f"現在のターンは{color[self.board.nowturn]}です"
         txt = self.font.render(st, True, "#000000")
         self.screen.blit(txt, txt.get_rect(
-            center=((w + h + interval) / 2, h / 2 - row * self.font_size)))
+            center=((w + h) / 2, h / 2 - row * self.font_size)))
 
     def draw_finish(self):
         w = self.disp_w
         h = self.disp_h
-        n_h = BOARDSIZE_H
-        sp = self.init_space
-        interval = (h - 2 * sp) / n_h
-
-        color = {RED: "赤", YELLOW: "黄"}
+        color = {BLACK: "黒", WHITE: "白"}
+        bl = np.sum(self.board.stone == BLACK)
+        wh = np.sum(self.board.stone == WHITE)
         st = ["しゅうりょうーーー"]
 
         if self.board.status == 2:
@@ -205,24 +188,19 @@ class Game:
         for i, s in enumerate(st):
             txt = self.font.render(s, True, "#000000")
             self.screen.blit(txt, txt.get_rect(
-                center=((w + h + interval) / 2,
-                        h / 2 - (5 - i) * self.font_size)))
+                center=((w + h) / 2, h / 2 - (5 - i) * self.font_size)))
 
     def draw_explanation(self):
         w = self.disp_w
         h = self.disp_h
-        n_h = BOARDSIZE_H
-        sp = self.init_space
-        interval = (h - 2 * sp) / n_h
         st = ["Q → ゲームをやめる", "Z → 一つもどる"]
         for i, s in enumerate(st):
             txt = self.font.render(s, True, "#000000")
             self.screen.blit(txt, txt.get_rect(
-                center=((w + h + interval) / 2,
-                        h / 2 + (5 - i) * self.font_size)))
+                center=((w + h) / 2, h / 2 + (5 - i) * self.font_size)))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     DISPLAY_W = 1000
     DISPLAY_H = 600
     Game(DISPLAY_W, DISPLAY_H)

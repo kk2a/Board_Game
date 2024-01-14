@@ -138,7 +138,7 @@ class Game:
         self.init_space = 10
 
         self.font_size = 20
-        self.font = pg.font.Font("ipaexg.ttf", self.font_size)
+        self.font = pg.font.Font("../ipaexg.ttf", self.font_size)
 
         self.paper_w = w / 3
         self.paper_h = h - 2 * self.init_space

@@ -5,77 +5,104 @@ import copy
 BLACK = 1
 WHITE = -1
 NONE = 0
-BOARD_SIZE = 14
 
 
 class Board:
-    def __init__(self):
-        n = BOARD_SIZE
-        self.stone = np.zeros((n + 1, n + 1))
+    def __init__(self, n):
+        assert not (n & 1)
+        self._n = n
+        self.stone = np.zeros((n, n))
+        tmp = n >> 1
+        self.stone[tmp - 1, tmp - 1] = WHITE
+        self.stone[tmp, tmp] = WHITE
+        self.stone[tmp - 1, tmp] = BLACK
+        self.stone[tmp, tmp - 1] = BLACK
 
         self.nowturn = BLACK
         self.hist = []
 
         # 0: normal
-        # BLACK: black win
-        # WHITE: white win
-        # 2: draw
+        # 1: lose a turn
+        # 2: end
         self.status = 0
 
-    def __valid(self, i, j):
-        n = BOARD_SIZE
-        if not (0 <= i < n + 1 and 0 <= j < n + 1):
+    def __valid(self, i, j, di, dj, nt):
+        n = self._n
+        if not (0 <= i < n and 0 <= j < n):
             return 0
         if self.stone[i, j]:
             return 0
-        if self.status:
-            return 0
-        return 1
+
+        ni = i + di
+        nj = j + dj
+        num = 0
+
+        while True:
+            if not (0 <= ni < n and 0 <= nj < n):
+                num = 0
+                break
+            if not self.stone[ni, nj]:  # none
+                num = 0
+                break
+            if self.stone[ni, nj] + nt:
+                break
+            num += 1
+            ni += di
+            nj += dj
+        return num
 
     def valid(self, i, j):
+        di = [0, 1, 1, 1, 0, -1, -1, -1]
+        dj = [-1, -1, 0, 1, 1, 1, 0, -1]
+        res = False
+        snap = True
+        good = np.zeros(8, int)
         i = int(i)
         j = int(j)
-        if not self.__valid(i, j):
-            return
-        self.snapshot()
-        self.stone[i, j] = self.nowturn
-        self.next(i, j)
 
-    def next(self, i, j):
-        n = BOARD_SIZE
-        di = [0, 1, 1, 1]
-        dj = [-1, -1, 0, 1]
+        for k in range(8):
+            num = self.__valid(i, j, di[k], dj[k], self.nowturn)
+            good[k] = num
 
-        for k in range(4):
-            for ii in range(5):
-                ni = i + ii * di[k]
-                nj = j + ii * dj[k]
-                nii = i + (ii - 4) * di[k]
-                njj = j + (ii - 4) * dj[k]
-                if not (0 <= ni < n + 1 and 0 <= nj < n + 1):
-                    continue
-                if not (0 <= nii < n + 1 and 0 <= njj < n + 1):
-                    continue
-                tmp = -self.nowturn * 5
-                for _ in range(5):
-                    tmp += self.stone[ni, nj]
-                    ni -= di[k]
-                    nj -= dj[k]
+        for k in range(8):
+            if good[k]:
+                if snap:
+                    self.snapshot()
+                    snap = False
+                res = True
+                for L in range(good[k] + 1):
+                    self.stone[i + di[k] * L, j + dj[k] * L] = self.nowturn
 
-                if not tmp:
-                    self.status = self.nowturn
-                    return
-        if not np.sum(self.stone == NONE):
-            self.status = 2
-            return
-        self.nowturn = -self.nowturn
+        if res:
+            self.next()
+
+    def next(self):
+        n = self._n
+        di = [0, 1, 1, 1, 0, -1, -1, -1]
+        dj = [-1, -1, 0, 1, 1, 1, 0, -1]
+        for i in range(n):
+            for j in range(n):
+                for k in range(8):
+                    num = self.__valid(i, j, di[k], dj[k], -self.nowturn)
+                    if num > 0:
+                        self.status = 0
+                        self.nowturn = -self.nowturn
+                        return
+        for i in range(n):
+            for j in range(n):
+                for k in range(8):
+                    num = self.__valid(i, j, di[k], dj[k], self.nowturn)
+                    if num > 0:
+                        self.status = 1
+                        return
+        self.status = 2
 
     def snapshot(self):
         self.hist.append((copy.deepcopy(self.stone),
                           self.nowturn, self.status))
 
     def rollback(self):
-        n = BOARD_SIZE
+        n = self._n
         if not len(self.hist):
             return
         tmp = self.hist.pop()
@@ -85,9 +112,10 @@ class Board:
 
 
 class Game:
-    def __init__(self, w, h):
+    def __init__(self, n, w, h):
         pg.init()
-        self.board = Board()
+        self.board = Board(n)
+        self._n = n
         self.exit_flag = False
 
         self.disp_w = w
@@ -96,7 +124,7 @@ class Game:
         self.init_space = 20
 
         self.font_size = 20
-        self.font = pg.font.Font("ipaexg.ttf", self.font_size)
+        self.font = pg.font.Font("../ipaexg.ttf", self.font_size)
 
         while not self.exit_flag:
             self.update()
@@ -120,23 +148,23 @@ class Game:
     def __convert(self, p):
         i, j = p
         sp = self.init_space
-        n = BOARD_SIZE
+        n = self._n
         h = self.disp_h
         interval = (h - 2 * sp) / n
-        i -= sp - interval / 2
+        i -= sp
         i //= interval
-        j -= sp - interval / 2
+        j -= sp
         j //= interval
         return (i, j)
 
     def draw(self):
         sp = self.init_space
-        n = BOARD_SIZE
+        n = self._n
         w = self.disp_w
         h = self.disp_h
         interval = (h - 2 * sp) / n
 
-        self.screen.fill('#c18a39')
+        self.screen.fill('#009900')
         for i in range(n + 1):
             pg.draw.line(self.screen, '#000000',
                          (sp + i * interval, sp),
@@ -145,22 +173,17 @@ class Game:
                          (sp, sp + i * interval),
                          (h - sp, sp + i * interval))
 
-        chobo = ((3, 3), (3, n - 3), (n - 3, 3), (n - 3, n - 3))
-        for i, j in chobo:
-            pg.draw.circle(self.screen, '#000000',
-                           (sp + i * interval, sp + j * interval), 3)
-
         color = {BLACK: "#000000", WHITE: "#ffffff"}
-        for i in range(n + 1):
-            for j in range(n + 1):
+        for i in range(n):
+            for j in range(n):
                 if self.board.stone[i, j]:
                     pg.draw.circle(self.screen, color[self.board.stone[i][j]],
-                                   (sp + interval * i,
-                                    sp + interval * j),
+                                   (sp + interval * (i + 0.5),
+                                    sp + interval * (j + 0.5)),
                                    interval / 2 * 0.9)
 
         self.draw_explanation()
-        if self.board.status:
+        if self.board.status == 2:
             self.draw_finish()
             return
 
@@ -171,6 +194,18 @@ class Game:
         txt = self.font.render(st, True, "#000000")
         self.screen.blit(txt, txt.get_rect(
             center=((w + h) / 2, h / 2 - row * self.font_size)))
+        if self.board.status == 1:
+            row -= 1
+            self.draw_lose_a_turn(row)
+
+    def draw_lose_a_turn(self, r):
+        w = self.disp_w
+        h = self.disp_h
+        color = {BLACK: "黒", WHITE: "白"}
+        st = f"置く場所がなかったので{color[-self.board.nowturn]}は休みです"
+        txt = self.font.render(st, True, "#000000")
+        self.screen.blit(txt, txt.get_rect(
+            center=((w + h) / 2, h / 2 - r * self.font_size)))
 
     def draw_finish(self):
         w = self.disp_w
@@ -178,12 +213,12 @@ class Game:
         color = {BLACK: "黒", WHITE: "白"}
         bl = np.sum(self.board.stone == BLACK)
         wh = np.sum(self.board.stone == WHITE)
-        st = ["しゅうりょうーーー"]
+        st = ["しゅうりょうーーー", f"黒:{bl}枚", f"白:{wh}枚"]
 
-        if self.board.status == 2:
+        if bl == wh:
             st.append("引き分け！！すげー")
         else:
-            st.append(f"{color[self.board.status]}の勝ち！！")
+            st.append(f"{color[(bl - wh) // abs(bl - wh)]}の勝ち！！")
 
         for i, s in enumerate(st):
             txt = self.font.render(s, True, "#000000")
@@ -203,4 +238,6 @@ class Game:
 if __name__ == '__main__':
     DISPLAY_W = 1000
     DISPLAY_H = 600
-    Game(DISPLAY_W, DISPLAY_H)
+    n = 6
+    Game(n, DISPLAY_W, DISPLAY_H)
+    
