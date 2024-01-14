@@ -96,6 +96,7 @@ class Board:
 class Game:
     def __init__(self, w, h):
         pg.init()
+        pg.display.set_caption("connect four")   
         self.board = Board()
         self.exit_flag = False
 

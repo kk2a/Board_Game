@@ -87,6 +87,7 @@ class Board:
 class Game:
     def __init__(self, w, h):
         pg.init()
+        pg.display.set_caption("五目並べ")   
         self.board = Board()
         self.exit_flag = False
 

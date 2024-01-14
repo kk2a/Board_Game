@@ -121,6 +121,7 @@ class Paper:
 class Game:
     def __init__(self, w, h):
         pg.init()
+        pg.display.set_caption("yacht")   
         self.p1 = Paper()
         self.p2 = Paper()
         self.d1 = Dices()

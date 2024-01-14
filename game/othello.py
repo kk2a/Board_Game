@@ -114,6 +114,7 @@ class Board:
 class Game:
     def __init__(self, n, w, h):
         pg.init()
+        pg.display.set_caption("othello")   
         self.board = Board(n)
         self._n = n
         self.exit_flag = False
