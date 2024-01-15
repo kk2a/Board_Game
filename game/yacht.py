@@ -1,5 +1,4 @@
 import pygame as pg
-import numpy as np
 import random
 import copy
 
@@ -121,7 +120,7 @@ class Paper:
 class Game:
     def __init__(self, w, h):
         pg.init()
-        pg.display.set_caption("yacht")   
+        pg.display.set_caption("yacht")
         self.p1 = Paper()
         self.p2 = Paper()
         self.d1 = Dices()
