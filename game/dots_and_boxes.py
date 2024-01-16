@@ -135,9 +135,8 @@ class Game:
         pos = np.array(pg.mouse.get_pos(), float)
         pos -= sp
         pos = rot @ pos
-        pos += np.array([0, interval * tmp])
         pos //= interval * tmp
-        return (int(pos[0] - pos[1] + 1), int(pos[0] + pos[1]))
+        return (int(pos[0] - pos[1]), int(pos[0] + pos[1] + 1))
 
     def draw(self):
         self.screen.fill("#ffffff")
