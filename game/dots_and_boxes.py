@@ -301,6 +301,7 @@ class Game:
                 center=((sp + iv * (dw - 1) + w) / 2,
                         h / 2 - (5 - i) * self.font_size)))
 
+
 if __name__ == "__main__":
     dot = (5, 7)
     disp = (1000, 600)

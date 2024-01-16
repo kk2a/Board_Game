@@ -110,7 +110,7 @@ class Board:
 class Game:
     def __init__(self, n, w, h):
         pg.init()
-        pg.display.set_caption("othello")   
+        pg.display.set_caption("othello")
         self.board = Board(n)
         self._n = n
         self.exit_flag = False
@@ -155,13 +155,20 @@ class Game:
         return (i, j)
 
     def draw(self):
+        self.screen.fill('#009900')
+        self.draw_board()
+        self.draw_stones()
+        self.draw_explanation()
+        if self.board.status == 2:
+            self.draw_finish()
+            return
+        self.draw_turn()
+
+    def draw_board(self):
         sp = self.init_space
         n = self._n
-        w = self.disp_w
         h = self.disp_h
         interval = (h - 2 * sp) / n
-
-        self.screen.fill('#009900')
         for i in range(n + 1):
             pg.draw.line(self.screen, '#000000',
                          (sp + i * interval, sp),
@@ -170,6 +177,11 @@ class Game:
                          (sp, sp + i * interval),
                          (h - sp, sp + i * interval))
 
+    def draw_stones(self):
+        sp = self.init_space
+        n = self._n
+        h = self.disp_h
+        interval = (h - 2 * sp) / n
         color = {BLACK: "#000000", WHITE: "#ffffff"}
         for i in range(n):
             for j in range(n):
@@ -179,14 +191,12 @@ class Game:
                                     sp + interval * (j + 0.5)),
                                    interval / 2 * 0.9)
 
-        self.draw_explanation()
-        if self.board.status == 2:
-            self.draw_finish()
-            return
-
+    def draw_turn(self):
+        w = self.disp_w
+        h = self.disp_h
         row = 5
-        color[BLACK] = "黒"
-        color[WHITE] = "白"
+        color = {BLACK: "黒", WHITE: "白"}
+
         st = f"現在のターンは{color[self.board.nowturn]}です"
         txt = self.font.render(st, True, "#000000")
         self.screen.blit(txt, txt.get_rect(

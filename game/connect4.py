@@ -83,17 +83,15 @@ class Board:
                           self.nowturn, self.status))
 
     def rollback(self):
-        h = BOARDSIZE_H
-        w = BOARDSIZE_W
         if not len(self.hist):
             return
-        self.board, self.nowturn, self.status = self.hist.pop()
+        self.stone, self.nowturn, self.status = self.hist.pop()
 
 
 class Game:
     def __init__(self, w, h):
         pg.init()
-        pg.display.set_caption("connect four")   
+        pg.display.set_caption("connect four")
         self.board = Board()
         self.exit_flag = False
 
@@ -137,16 +135,25 @@ class Game:
         return (i, j)
 
     def draw(self):
+        back = "#e2e2e2"
+        self.screen.fill(back)
+        self.draw_board(back)
+        self.draw_stones()
+        self.draw_explanation()
+        if self.board.status:
+            self.draw_finish()
+            return
+        self.draw_turn()
+
+    def draw_board(self, back):
         sp = self.init_space
         n_h = BOARDSIZE_H
         n_w = BOARDSIZE_W
-        w = self.disp_w
         h = self.disp_h
         interval = (h - 2 * sp) / n_h
 
-        back = "#e2e2e2"
-        self.screen.fill(back)
-        pg.draw.rect(self.screen, "#0981cb", (sp, sp, interval * n_w, interval * n_h))
+        pg.draw.rect(self.screen, "#0981cb",
+                     (sp, sp, interval * n_w, interval * n_h))
         for i in range(n_w + 1):
             pg.draw.line(self.screen, '#000000',
                          (sp + i * interval, sp),
@@ -163,6 +170,12 @@ class Game:
                                 sp + interval * (j + 0.5)),
                                interval / 2 * 0.85)
 
+    def draw_stones(self):
+        sp = self.init_space
+        n_h = BOARDSIZE_H
+        n_w = BOARDSIZE_W
+        h = self.disp_h
+        interval = (h - 2 * sp) / n_h
         color = {RED: "#e60000", YELLOW: "#e6e645"}
         for i in range(n_w):
             for j in range(n_h):
@@ -172,14 +185,14 @@ class Game:
                                     sp + interval * (j + 0.5)),
                                    interval / 2 * 0.85)
 
-        self.draw_explanation()
-        if self.board.status:
-            self.draw_finish()
-            return
-
+    def draw_turn(self):
+        sp = self.init_space
+        n_h = BOARDSIZE_H
+        w = self.disp_w
+        h = self.disp_h
+        interval = (h - 2 * sp) / n_h
+        color = {RED: "赤", YELLOW: "黄"}
         row = 5
-        color[RED] = "赤"
-        color[YELLOW] = "黄"
         st = f"現在のターンは{color[self.board.nowturn]}です"
         txt = self.font.render(st, True, "#000000")
         self.screen.blit(txt, txt.get_rect(

@@ -78,13 +78,13 @@ class Board:
         n = BOARD_SIZE
         if not len(self.hist):
             return
-        self.board, self.nowturn, self.status = self.hist.pop()
+        self.stone, self.nowturn, self.status = self.hist.pop()
 
 
 class Game:
     def __init__(self, w, h):
         pg.init()
-        pg.display.set_caption("五目並べ")   
+        pg.display.set_caption("五目並べ")
         self.board = Board()
         self.exit_flag = False
 
@@ -128,13 +128,20 @@ class Game:
         return (i, j)
 
     def draw(self):
+        self.screen.fill('#c18a39')
+        self.draw_board()
+        self.draw_stones()
+        self.draw_explanation()
+        if self.board.status:
+            self.draw_finish()
+            return
+        self.draw_turn()
+
+    def draw_board(self):
         sp = self.init_space
         n = BOARD_SIZE
-        w = self.disp_w
         h = self.disp_h
         interval = (h - 2 * sp) / n
-
-        self.screen.fill('#c18a39')
         for i in range(n + 1):
             pg.draw.line(self.screen, '#000000',
                          (sp + i * interval, sp),
@@ -148,6 +155,11 @@ class Game:
             pg.draw.circle(self.screen, '#000000',
                            (sp + i * interval, sp + j * interval), 3)
 
+    def draw_stones(self):
+        sp = self.init_space
+        n = BOARD_SIZE
+        h = self.disp_h
+        interval = (h - 2 * sp) / n
         color = {BLACK: "#000000", WHITE: "#ffffff"}
         for i in range(n + 1):
             for j in range(n + 1):
@@ -157,14 +169,12 @@ class Game:
                                     sp + interval * j),
                                    interval / 2 * 0.9)
 
-        self.draw_explanation()
-        if self.board.status:
-            self.draw_finish()
-            return
-
+    def draw_turn(self):
+        w = self.disp_w
+        h = self.disp_h
         row = 5
-        color[BLACK] = "黒"
-        color[WHITE] = "白"
+        color = {BLACK: "黒", WHITE: "白"}
+
         st = f"現在のターンは{color[self.board.nowturn]}です"
         txt = self.font.render(st, True, "#000000")
         self.screen.blit(txt, txt.get_rect(
@@ -174,8 +184,6 @@ class Game:
         w = self.disp_w
         h = self.disp_h
         color = {BLACK: "黒", WHITE: "白"}
-        bl = np.sum(self.board.stone == BLACK)
-        wh = np.sum(self.board.stone == WHITE)
         st = ["しゅうりょうーーー"]
 
         if self.board.status == 2:
