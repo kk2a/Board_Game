@@ -85,8 +85,7 @@ class Board:
     def undo(self):
         if not len(self.hist):
             return
-        tmp = self.hist.pop()
-        self.board, self.now, self.status = tmp
+        self.board, self.now, self.status = self.hist.pop()
 
 
 class Game:

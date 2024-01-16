@@ -104,8 +104,7 @@ class Board:
     def rollback(self):
         if not len(self.hist):
             return
-        tmp = self.hist.pop()
-        self.stone, self.nowturn, self.status = tmp
+        self.stone, self.nowturn, self.status = self.hist.pop()
 
 
 class Game:

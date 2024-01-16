@@ -78,10 +78,7 @@ class Board:
         n = BOARD_SIZE
         if not len(self.hist):
             return
-        tmp = self.hist.pop()
-        self.nowturn = tmp[1]
-        self.status = tmp[2]
-        self.stone = copy.deepcopy(tmp[0])
+        self.board, self.nowturn, self.status = self.hist.pop()
 
 
 class Game:
