@@ -215,12 +215,12 @@ class Game:
         n_h = BOARDSIZE_H
         sp = self.init_space
         interval = (h - 2 * sp) / n_h
-        st = ["Q: ゲームをやめる", "Z: 一つもどる"]
+        st = ["Q: ゲームをやめる", "Z: 一つもどる", "CLICK: 石を入れる"]
         for i, s in enumerate(st):
             txt = self.font.render(s, True, "#000000")
             self.screen.blit(txt, txt.get_rect(
                 center=((w + h + interval) / 2,
-                        h / 2 + (5 - i) * self.font_size)))
+                        h / 2 + (5 + i) * self.font_size)))
 
 
 if __name__ == "__main__":

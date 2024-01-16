@@ -194,11 +194,11 @@ class Game:
     def draw_explanation(self):
         w = self.disp_w
         h = self.disp_h
-        st = ["Q: ゲームをやめる", "Z: 一つもどる"]
+        st = ["Q: ゲームをやめる", "Z: 一つもどる", "CLICK: 石を置く"]
         for i, s in enumerate(st):
             txt = self.font.render(s, True, "#000000")
             self.screen.blit(txt, txt.get_rect(
-                center=((w + h) / 2, h / 2 + (5 - i) * self.font_size)))
+                center=((w + h) / 2, h / 2 + (5 + i) * self.font_size)))
 
 
 if __name__ == '__main__':

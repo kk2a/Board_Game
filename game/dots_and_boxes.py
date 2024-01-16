@@ -82,7 +82,7 @@ class Board:
         self.hist.append((copy.deepcopy(self.board),
                           self.now, self.status))
 
-    def rollback(self):
+    def undo(self):
         if not len(self.hist):
             return
         tmp = self.hist.pop()
@@ -94,6 +94,9 @@ class Game:
         pg.init()
         pg.display.set_caption("dot and box")
         self.disp_w, self.disp_h = disp
+        if dot[0] > dot[1]:
+            # 描画のことを考えてswapしておく
+            dot = (dot[1], dot[0])
         self.dot_w, self.dot_h = dot
         self.board = Board(dot)
         self.init_space = 50
@@ -111,6 +114,7 @@ class Game:
         while not self.exit_flag:
             self.update()
             self.draw()
+        pg.quit()
 
     def update(self):
         for event in pg.event.get():
@@ -118,14 +122,27 @@ class Game:
                 self.exit_flag = True
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_q:
-                    self.ecit_flag = True
+                    self.exit_flag = True
+                if event.key == pg.K_z:
+                    self.board.undo()
             if event.type == pg.MOUSEBUTTONDOWN:
                 i, j = self.mouse_pos_con()
                 self.board.write(i, j)
         pg.display.update()
 
+    def draw(self):
+        self.screen.fill("#ffffff")
+        self.draw_dot()
+        self.draw_line_guide()
+        self.draw_lines()
+        self.draw_cells()
+        self.draw_explanation()
+        if self.board.status == 2:
+            self.draw_finish()
+            return
+        self.draw_turn()
+
     def mouse_pos_con(self):
-        h = self.dot_h
         sp = self.init_space
         interval = self.interval
 
@@ -137,13 +154,6 @@ class Game:
         pos = rot @ pos
         pos //= interval * tmp
         return (int(pos[0] - pos[1]), int(pos[0] + pos[1] + 1))
-
-    def draw(self):
-        self.screen.fill("#ffffff")
-        self.draw_dot()
-        self.draw_line_guide()
-        self.draw_lines()
-        self.draw_cells()
 
     def draw_dot(self):
         sp = self.init_space
@@ -214,10 +224,85 @@ class Game:
         pos = self.mouse_pos_con()
         if not (0 <= pos[0] < 2 * w - 1 and 0 <= pos[1] < 2 * h - 1):
             return
-        self.__draw_line(pos, "#000000", True)
+        # 点線とかにしたいけど、検索してもいい感じのものが見つからなかった
+        # ので、1px細くした
+        self.__draw_line(pos, self.color[self.board.now], True)
 
+    def draw_turn(self):
+        w = self.disp_w
+        h = self.disp_h
+        iv = self.interval
+        sp = self.init_space
+        dw = self.dot_w
+        color = {RED: "赤", BLUE: "青"}
+
+        row = 5
+        st = f"現在のターンは{color[self.board.now]}です"
+        txt = self.font.render(st, True, "#000000")
+        self.screen.blit(txt, txt.get_rect(
+            center=((sp + iv * (dw - 1) + w) / 2,
+                    h / 2 - row * self.font_size)))
+        if self.board.status == 1:
+            row -= 1
+            self.draw_again(row)
+
+    def draw_again(self, row):
+        w = self.disp_w
+        h = self.disp_h
+        iv = self.interval
+        sp = self.init_space
+        dw = self.dot_w
+        color = {RED: "赤", BLUE: "青"}
+        st = [f"四角ができました", f"もう一度{color[self.board.now]}のターンです"]
+        for s in st:
+            txt = self.font.render(s, True, "#000000")
+            self.screen.blit(txt, txt.get_rect(
+                center=((sp + iv * (dw - 1) + w) / 2,
+                        h / 2 - row * self.font_size)))
+            row -= 1
+
+    def draw_explanation(self):
+        w = self.disp_w
+        h = self.disp_h
+        iv = self.interval
+        sp = self.init_space
+        dw = self.dot_w
+        st = ["Q: ゲームをやめる", "Z: 一つもどる", "CLICK: 線を書く"]
+        for i, s in enumerate(st):
+            txt = self.font.render(s, True, "#000000")
+            self.screen.blit(txt, txt.get_rect(
+                center=((sp + iv * (dw - 1) + w) / 2,
+                        h / 2 + (5 + i) * self.font_size)))
+
+    def draw_finish(self):
+        w = self.disp_w
+        h = self.disp_h
+        iv = self.interval
+        sp = self.init_space
+        dw = self.dot_w
+        dh = self.dot_h
+        sum = {RED: 0, BLUE: 0}
+        for i in range(2 * dw - 1):
+            for j in range(2 * dh - 1):
+                if not (i & 1 and j & 1):
+                    continue
+                sum[self.board.board[i, j]] += 1
+
+        st = ["しゅうりょうーーー", f"赤:{sum[RED]}こ", f"青:{sum[BLUE]}こ"]
+        if sum[RED] == sum[BLUE]:
+            st.append("引き分けじゃん！！いい勝負！！")
+        elif sum[RED] > sum[BLUE]:
+            st.append("赤の勝ち！！！")
+        else:
+            st.append("青の勝ち！！！")
+
+        for i, s in enumerate(st):
+            txt = self.font.render(s, True, "#000000")
+            self.screen.blit(txt, txt.get_rect(
+                center=((sp + iv * (dw - 1) + w) / 2,
+                        h / 2 - (5 - i) * self.font_size)))
 
 if __name__ == "__main__":
-    dot = (6, 6)
+    dot = (5, 7)
     disp = (1000, 600)
     Game(disp, dot)
