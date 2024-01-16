@@ -448,7 +448,7 @@ class Game:
         dsz = self.dsz
         dsp = self.dsp
         st = ["Q: ゲームをやめる", "SPACE: サイコロを振る",
-              "1,2,3,4,5: サイコロを選択", "LEFT CLICK: 役を選択"]
+              "1,2,3,4,5: サイコロを選択", "CLICK: 役を選択"]
         for i, s in enumerate(st):
             txt = pg.font.Font(
                 "../Mplus1-Black.ttf", 20
