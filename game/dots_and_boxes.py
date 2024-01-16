@@ -1,0 +1,199 @@
+import pygame as pg
+import numpy as np
+import copy
+
+RED = 1
+BLUE = -1
+NONE = 0
+
+
+class Board:
+    def __init__(self, dot):
+        self._w, self._h = dot
+        assert self._w > 1 and self._h > 1
+
+        # (odd, even) or (even, odd) -> edge
+        # (odd, odd) -> cell
+        # (even, even) -> dot
+        self.board = np.zeros((2 * self._w - 1, 2 * self._h - 1), int)
+
+        self.now = RED
+        self.hist = []
+
+        # 0: normal
+        # 1: again
+        # 2: end
+        self.status = 0
+
+    def valid_line(self, i, j):
+        w = self._w
+        h = self._h
+
+        if not (i + j) & 1:
+            return False
+        if not (0 <= i < 2 * w - 1 and 0 <= j < 2 * h - 1):
+            return False
+        if self.board[i, j]:
+            return False
+        return True
+
+    def write(self, i, j):
+        if not self.valid_line(i, j):
+            return
+        self.snapshot()
+        self.board[i, j] = self.now
+        self.next(i, j)
+
+    def next(self, i, j):
+        h = self._h
+        w = self._w
+        di = (1, 0, -1, 0)
+        dj = (0, 1, 0, -1)
+
+        self.status = 0
+        for d in range(4):
+            ni = i + di[d]
+            nj = j + dj[d]
+            if not (0 <= ni < 2 * w - 1 and 0 <= nj < 2 * h - 1):
+                continue
+            if not (ni & 1 and nj & 1):
+                continue
+            flag = True
+            for dd in range(4):
+                if not self.board[ni + di[dd], nj + dj[dd]]:
+                    flag = False
+                    break
+            if flag:
+                self.board[ni, nj] = self.now
+                self.status = 1
+        self.is_end()
+        self.now *= -1 if not self.status else 1
+
+    def is_end(self):
+        h = self._h
+        w = self._w
+        for i in range(2 * w - 1):
+            for j in range(2 * h - 1):
+                if (i + j) & 1 and not self.board[i, j]:
+                    return
+        self.status = 2
+
+    def snapshot(self):
+        self.hist.append((copy.deepcopy(self.board),
+                          self.now, self.status))
+
+    def rollback(self):
+        if not len(self.hist):
+            return
+        tmp = self.hist.pop()
+        self.board, self.now, self.status = tmp
+
+
+class Game:
+    def __init__(self, disp, dot):
+        pg.init()
+        pg.display.set_caption("dot and box")
+        self.disp_w, self.disp_h = disp
+        self.dot_w, self.dot_h = dot
+        self.board = Board(dot)
+        self.init_space = 50
+        self.screen = pg.display.set_mode((self.disp_w, self.disp_h))
+        self.dot_r = 4
+        self.color = {RED: "#ff0000", BLUE: "#0000ff"}
+
+        self.exit_flag = False
+
+        while not self.exit_flag:
+            self.update()
+            self.draw()
+
+    def update(self):
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                self.exit_flag = True
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_q:
+                    self.ecit_flag = True
+            if event.type == pg.MOUSEBUTTONDOWN:
+                i, j = self.mouse_pos_con()
+                self.board.write(i, j)
+        pg.display.update()
+
+    def mouse_pos_con(self):
+        h = self.dot_h
+        sp = self.init_space
+        interval = (self.disp_h - 2 * sp) / (h - 1)
+
+        tmp = 2 ** (-0.5)
+        rot = np.array([[tmp, tmp], [-tmp, tmp]])
+
+        pos = np.array(pg.mouse.get_pos(), float)
+        pos -= sp
+        pos = rot @ pos
+        pos += np.array([0, interval * tmp])
+        pos //= interval * tmp
+        return (int(pos[0] - pos[1] + 1), int(pos[0] + pos[1]))
+
+    def draw(self):
+        self.screen.fill("#ffffff")
+        self.draw_dot()
+        self.draw_line_guide()
+        self.draw_lines()
+
+    def draw_dot(self):
+        sp = self.init_space
+        h = self.dot_h
+        w = self.dot_w
+        r = self.dot_r
+        interval = (self.disp_h - 2 * sp) / (h - 1)
+
+        for i in range(w):
+            for j in range(h):
+                pg.draw.circle(self.screen, "#000000",
+                               (sp + interval * i + 1,
+                                sp + interval * j + 1), r)
+
+    def __draw_line(self, pos, color, f=False):
+        h = self.dot_h
+        sp = self.init_space
+        interval = (self.disp_h - 2 * sp) / (h - 1)
+        width = 1 if f else 2
+        i, j = pos
+
+        assert (i + j) & 1
+        d = ((1, 0), (-1, 0)) if i & 1 else ((0, 1), (0, -1))
+        start = (sp + interval * (i + d[0][0]) / 2,
+                 sp + interval * (j + d[0][1]) / 2)
+        end = (sp + interval * (i + d[1][0]) / 2,
+               sp + interval * (j + d[1][1]) / 2)
+        pg.draw.line(self.screen, color, start, end, width)
+
+    def draw_lines(self):
+        h = self.dot_h
+        w = self.dot_w
+        sp = self.init_space
+        interval = (self.disp_h - 2 * sp) / (h - 1)
+        c = self.color
+
+        for i in range(2 * w - 1):
+            for j in range(2 * h - 1):
+                if not (i + j) & 1:
+                    continue
+                if not self.board.board[i, j]:
+                    continue
+                color = c[self.board.board[i, j]]
+                self.__draw_line((i, j), color)
+
+    def draw_line_guide(self):
+        w = self.dot_w
+        h = self.dot_h
+        pos = self.mouse_pos_con()
+        if not (0 <= pos[0] < 2 * w - 1 and 0 <= pos[1] < 2 * h - 1):
+            return
+        self.__draw_line(pos, "#000000", True)
+
+
+if __name__ == "__main__":
+    dot = (6, 6)
+    disp = (1000, 600)
+    Game(disp, dot)

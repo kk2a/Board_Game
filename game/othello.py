@@ -102,13 +102,10 @@ class Board:
                           self.nowturn, self.status))
 
     def rollback(self):
-        n = self._n
         if not len(self.hist):
             return
         tmp = self.hist.pop()
-        self.nowturn = tmp[1]
-        self.status = tmp[2]
-        self.stone = copy.deepcopy(tmp[0])
+        self.stone, self.nowturn, self.stone = tmp
 
 
 class Game:
@@ -241,4 +238,3 @@ if __name__ == '__main__':
     DISPLAY_H = 600
     n = 6
     Game(n, DISPLAY_W, DISPLAY_H)
-    
