@@ -459,10 +459,6 @@ class Game:
 
 
 if __name__ == "__main__":
-    a = Paper()
-    d = Dices()
-    d.roll()
-    print(a.valid_table(d).values())
     DISPLAY_W = 800
     DISPLAY_H = 600
     Game(DISPLAY_W, DISPLAY_H)
