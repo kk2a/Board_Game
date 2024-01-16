@@ -97,9 +97,14 @@ class Game:
         self.dot_w, self.dot_h = dot
         self.board = Board(dot)
         self.init_space = 50
+        self.interval = (self.disp_h - 2 *
+                         self.init_space) / (self.dot_h - 1)
         self.screen = pg.display.set_mode((self.disp_w, self.disp_h))
         self.dot_r = 4
         self.color = {RED: "#ff0000", BLUE: "#0000ff"}
+
+        self.font_size = 20
+        self.font = pg.font.Font("../Mplus1-Black.ttf", self.font_size)
 
         self.exit_flag = False
 
@@ -122,7 +127,7 @@ class Game:
     def mouse_pos_con(self):
         h = self.dot_h
         sp = self.init_space
-        interval = (self.disp_h - 2 * sp) / (h - 1)
+        interval = self.interval
 
         tmp = 2 ** (-0.5)
         rot = np.array([[tmp, tmp], [-tmp, tmp]])
@@ -139,13 +144,14 @@ class Game:
         self.draw_dot()
         self.draw_line_guide()
         self.draw_lines()
+        self.draw_cells()
 
     def draw_dot(self):
         sp = self.init_space
         h = self.dot_h
         w = self.dot_w
         r = self.dot_r
-        interval = (self.disp_h - 2 * sp) / (h - 1)
+        interval = self.interval
 
         for i in range(w):
             for j in range(h):
@@ -156,7 +162,7 @@ class Game:
     def __draw_line(self, pos, color, f=False):
         h = self.dot_h
         sp = self.init_space
-        interval = (self.disp_h - 2 * sp) / (h - 1)
+        interval = self.interval
         width = 1 if f else 2
         i, j = pos
 
@@ -171,8 +177,6 @@ class Game:
     def draw_lines(self):
         h = self.dot_h
         w = self.dot_w
-        sp = self.init_space
-        interval = (self.disp_h - 2 * sp) / (h - 1)
         c = self.color
 
         for i in range(2 * w - 1):
@@ -183,6 +187,27 @@ class Game:
                     continue
                 color = c[self.board.board[i, j]]
                 self.__draw_line((i, j), color)
+
+    def draw_cells(self):
+        h = self.dot_h
+        w = self.dot_w
+        sp = self.init_space
+        interval = self.interval
+        c = self.color
+        s = {RED: "RED", BLUE: "BLUE"}
+
+        for i in range(2 * w - 1):
+            for j in range(2 * h - 1):
+                if not (i & 1 and j & 1):
+                    continue
+                if not self.board.board[i, j]:
+                    continue
+                value = self.board.board[i, j]
+                txt = self.font.render(s[value], True, c[value])
+                self.screen.blit(txt, txt.get_rect(
+                    center=(sp + interval * (i / 2),
+                            sp + interval * (j / 2))
+                ))
 
     def draw_line_guide(self):
         w = self.dot_w
