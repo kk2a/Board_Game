@@ -106,7 +106,7 @@ class Game:
         self.color = {RED: "#ff0000", BLUE: "#0000ff"}
 
         self.font_size = 20
-        self.font = pg.font.Font("../Mplus1-Black.ttf", self.font_size)
+        self.font = pg.font.Font("Mplus1-Black.ttf", self.font_size)
 
         self.exit_flag = False
 

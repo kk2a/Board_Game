@@ -108,7 +108,7 @@ class Board:
 
 
 class Game:
-    def __init__(self, n, w, h):
+    def __init__(self, w, h, n):
         pg.init()
         pg.display.set_caption("othello")
         self.board = Board(n)
@@ -121,7 +121,7 @@ class Game:
         self.init_space = 20
 
         self.font_size = 20
-        self.font = pg.font.Font("../Mplus1-Black.ttf", self.font_size)
+        self.font = pg.font.Font("Mplus1-Black.ttf", self.font_size)
 
         while not self.exit_flag:
             self.update()
@@ -246,4 +246,4 @@ if __name__ == '__main__':
     DISPLAY_W = 1000
     DISPLAY_H = 600
     n = 6
-    Game(n, DISPLAY_W, DISPLAY_H)
+    Game(DISPLAY_W, DISPLAY_H, n)

@@ -101,7 +101,7 @@ class Game:
         self.init_space = 20
 
         self.font_size = 20
-        self.font = pg.font.Font("../Mplus1-Black.ttf", self.font_size)
+        self.font = pg.font.Font("Mplus1-Black.ttf", self.font_size)
 
         while not self.exit_flag:
             self.update()

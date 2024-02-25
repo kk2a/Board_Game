@@ -138,7 +138,7 @@ class Game:
         self.init_space = 10
 
         self.font_size = 15
-        self.font = pg.font.Font("../Mplus1-Black.ttf", self.font_size)
+        self.font = pg.font.Font("Mplus1-Black.ttf", self.font_size)
 
         self.paper_w = w / 3
         self.paper_h = h - 2 * self.init_space
@@ -451,7 +451,7 @@ class Game:
               "1,2,3,4,5: サイコロを選択", "CLICK: 役を選択"]
         for i, s in enumerate(st):
             txt = pg.font.Font(
-                "../Mplus1-Black.ttf", 20
+                "Mplus1-Black.ttf", 20
             ).render(s, True, "#000000")
             self.screen.blit(txt, txt.get_rect(
                 top=h / 3 + (8 + i) * 20,
